@@ -2,6 +2,7 @@ use std::convert::TryFrom;
 use std::ffi::CString;
 use std::io;
 use std::ptr;
+use std::str::FromStr;
 
 use mupdf_sys::*;
 
@@ -25,12 +26,6 @@ impl Buffer {
         Self::with_capacity(0)
     }
 
-    pub fn from_str(str: &str) -> Result<Self, Error> {
-        let c_str = CString::new(str)?;
-        let inner = unsafe { ffi_try!(mupdf_buffer_from_str(context(), c_str.as_ptr())) };
-        Ok(Self { inner, offset: 0 })
-    }
-
     pub fn from_base64(str: &str) -> Result<Self, Error> {
         let c_str = CString::new(str)?;
         let inner = unsafe { ffi_try!(mupdf_buffer_from_base64(context(), c_str.as_ptr())) };
@@ -44,6 +39,10 @@ impl Buffer {
 
     pub fn len(&self) -> usize {
         unsafe { fz_buffer_storage(context(), self.inner, ptr::null_mut()) }
+    }
+
+    pub fn is_empty(&self) -> bool {
+        (unsafe { fz_buffer_storage(context(), self.inner, ptr::null_mut()) } == 0)
     }
 
     fn read_bytes(&mut self, buf: &mut [u8]) -> Result<usize, Error> {
@@ -72,6 +71,15 @@ impl Buffer {
             ))
         };
         Ok(len)
+    }
+}
+
+impl FromStr for Buffer {
+    type Err = Error;
+    fn from_str(str: &str) -> Result<Self, Error> {
+        let c_str = CString::new(str)?;
+        let inner = unsafe { ffi_try!(mupdf_buffer_from_str(context(), c_str.as_ptr())) };
+        Ok(Self { inner, offset: 0 })
     }
 }
 
@@ -143,6 +151,7 @@ impl TryFrom<Vec<u8>> for Buffer {
 mod test {
     use super::Buffer;
     use std::io::{Read, Write};
+    use std::str::FromStr;
 
     #[test]
     fn test_buffer_len() {

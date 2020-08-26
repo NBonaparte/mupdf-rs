@@ -243,7 +243,7 @@ impl PdfDocument {
     pub fn from_bytes(bytes: &[u8]) -> Result<Self, Error> {
         let len = bytes.len();
         let mut buf = Buffer::with_capacity(len);
-        buf.write(bytes)?;
+        buf.write_all(bytes)?;
         unsafe {
             let inner = ffi_try!(mupdf_pdf_open_document_from_bytes(context(), buf.inner));
             Ok(Self::from_raw(inner))

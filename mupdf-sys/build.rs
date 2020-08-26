@@ -19,7 +19,7 @@ fn main() {
     println!("cargo:rerun-if-changed=wrapper.h");
     println!("cargo:rerun-if-changed=wrapper.c");
 
-    let profile = match &*env::var("PROFILE").unwrap_or("debug".to_owned()) {
+    let profile = match &*env::var("PROFILE").unwrap_or_else(|_| "debug".to_owned()) {
         "bench" | "release" => "release",
         _ => "debug",
     };

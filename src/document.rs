@@ -65,7 +65,7 @@ impl Document {
         let c_magic = CString::new(magic)?;
         let len = bytes.len();
         let mut buf = Buffer::with_capacity(len);
-        buf.write(bytes)?;
+        buf.write_all(bytes)?;
         let inner = unsafe {
             ffi_try!(mupdf_open_document_from_bytes(
                 context(),
@@ -141,7 +141,7 @@ impl Document {
         if !pdf.is_null() {
             return true;
         }
-        return false;
+        false
     }
 
     pub fn convert_to_pdf(

@@ -3,6 +3,7 @@ use std::ffi::{CStr, CString};
 use std::fmt;
 use std::io::{self, BufReader, Read, Write};
 use std::slice;
+use std::str::FromStr;
 
 use mupdf_sys::*;
 
@@ -302,6 +303,10 @@ impl PdfObject {
         Ok(size as usize)
     }
 
+    pub fn is_empty(&self) -> Result<bool, Error> {
+        Ok(unsafe { ffi_try!(mupdf_pdf_array_len(context(), self.inner)) } == 0)
+    }
+
     pub fn array_put(&mut self, index: i32, value: Self) -> Result<(), Error> {
         unsafe {
             ffi_try!(mupdf_pdf_array_put(
@@ -374,7 +379,7 @@ impl Write for PdfObject {
     fn write(&mut self, buf: &[u8]) -> io::Result<usize> {
         let len = buf.len();
         let mut fz_buf = Buffer::with_capacity(len);
-        fz_buf.write(buf)?;
+        fz_buf.write_all(buf)?;
         self.write_stream_buffer(&fz_buf)
             .map_err(|e| io::Error::new(io::ErrorKind::Other, e.to_string()))?;
         Ok(len)

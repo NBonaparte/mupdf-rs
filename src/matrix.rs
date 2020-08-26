@@ -1,3 +1,4 @@
+#![allow(clippy::many_single_char_names)]
 use std::f32::consts::PI;
 
 use mupdf_sys::*;

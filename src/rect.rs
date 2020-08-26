@@ -117,7 +117,7 @@ impl Rect {
     }
 
     pub fn is_empty(&self) -> bool {
-        self.x0 == self.x1 || self.y0 == self.y1
+        (self.x0 - self.x1).abs() < f32::EPSILON || (self.y0 - self.y1).abs() < f32::EPSILON
     }
 
     pub fn contains(&self, x: f32, y: f32) -> bool {
